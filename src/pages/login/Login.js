@@ -23,8 +23,9 @@ export default class Login extends Component {
         console.log("submitting");
         axios({
             method: 'post',
-            url: 'http://localhost:5000/user/login',
+            url: 'http://localhost:5000/users/login',
             data: {
+                name: this.state.name,
                 email: this.state.email,
                 password: this.state.password
             }
@@ -35,6 +36,14 @@ export default class Login extends Component {
         return (
             <div className="Login">
                 <Form onSubmit={this.handleSubmit}>
+                    <Form.Group size="lg" controlId="email">
+                        <Form.Label>Name</Form.Label>
+                        <Form.Control
+                            autoFocus
+                            type="text"
+                            onChange={(e) => this.setState({ name: e.target.value })}
+                        />
+                    </Form.Group>
                     <Form.Group size="lg" controlId="email">
                         <Form.Label>Email</Form.Label>
                         <Form.Control

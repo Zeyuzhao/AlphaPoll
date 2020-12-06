@@ -43,7 +43,7 @@ register = (req, res) => {
     const user = new User({
         name: req.body.name,
         email: req.body.email,
-        date: Date.now,
+        date: Date.now(),
         password: bcrypt.hashSync(req.body.password, 8)
     });
 
@@ -71,7 +71,7 @@ router.post('/login', (req, res) => {
 
             if (!user) {
                 console.log("user not found, registering");
-                register(req, res);
+                return register(req, res);
                 // return res.status(404).send({ message: "User Not found." });
             }
 
