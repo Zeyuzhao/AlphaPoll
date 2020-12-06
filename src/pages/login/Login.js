@@ -56,6 +56,7 @@ export default class Login extends Component {
             .then(res => {
                 console.log(res);
                 cookies.set('token', res.data.accessToken, { path: '/' });
+                window.location.href = window.location.href.split("/login")[0] + "/dashboard";
             })
             .catch(err => {
                 console.log(err);
