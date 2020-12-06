@@ -16,6 +16,8 @@ export default class Create extends Component {
             question: "",
             choices: [],
             pollURL: null,
+            n: 0,
+            choice_strs: []
         };
 
         this.handleAddChoice = this.handleAddChoice.bind(this);
@@ -81,24 +83,32 @@ export default class Create extends Component {
         );
     }
 
-    createChoice() {
+    createChoice(i) {
         return (
             <Form.Group size="lg">
                 <Form.Label>Choice</Form.Label>
-                <Form.Control/>
+                <Form.Control
+                    type="text"
+                    onChange={(e) => {
+                        let arr = this.state.choice_strs.slice();
+                        arr[i] = e.target.value;
+                        this.setState({ choice_strs: arr});
+                    }}
+                />
             </Form.Group>
         );
     }
 
     handleAddChoice() {
         this.setState({
-            choices: [...this.state.choices, this.createChoice()],
+            choices: [...this.state.choices, this.createChoice(this.state.n++)],
+            choice_strs: [...this.state.choice_strs, ""]
         })
     }
 
     handleSubmit(e) {
         e.preventDefault();
-        console.log(this.state.choices);
+        console.log(this.state.choice_strs);
 
         axios({
             method: 'post',
@@ -107,6 +117,11 @@ export default class Create extends Component {
                 token: cookies.get("token") || "",
 
                 title: this.state.title,
+                meta: {
+                    type: "binary",
+                    question: this.state.question,
+                    categories: this.state.choice_strs
+                }
             }
         })
         .then(id => {
