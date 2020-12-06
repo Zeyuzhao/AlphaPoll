@@ -64,14 +64,13 @@ export default class PollResponse extends Component {
     }
 
     getPoll() {
-        const domain = "http://localhost:3000";
-        const path = "http://localhost:3000/polls/submit";
+        const path = "http://localhost:3000/polls";
         const url = window.location.href;
         const id = url.substring(path.length);
-        const getLoc = url.substring(domain.length);
-        console.log(domain, path, url, id, getLoc);
+        const getLoc = "http://localhost:5000/polls/view" + id;
+        console.log(path, url, id, getLoc);
 
-        return axios.get("poo") //axios.get(getLoc)
+        return axios.get(getLoc)
         .then(res => {
             return {poll: res.data, id: id};
         })
@@ -108,8 +107,9 @@ class Poll extends Component {
 
     makeChoice(choice) {
         const send = () => {
-            axios.post("/polls/submit/" + this.props.id, choice)
+            axios.post("http://localhost:5000/polls/submit" + this.props.id, {value: choice})
             .then(res => {
+                console.log(res, res.data);
                 this.props.choose();
             })
             .catch(err => {
