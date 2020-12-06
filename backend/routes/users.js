@@ -7,7 +7,7 @@ const router = express.Router();
 
 const User = require('../models/User.model.js');
 
-check_duplicate = (email, callback, fail) => {
+const check_duplicate = (email, callback, fail) => {
     User.findOne({
         email: email
     }).exec((err, user) => {
@@ -38,11 +38,11 @@ router.post('/verify', (req, res) => {
     });
 });
 
-token = id => jwt.sign({ id: id }, config.secret, {
+const token = id => jwt.sign({ id: id }, config.secret, {
     expiresIn: 86400 // 24 hours
 });
 
-register = (req, res) => {
+const register = (req, res) => {
     console.log("registering!");
     const user = new User({
         name: req.body.name,
@@ -51,7 +51,7 @@ register = (req, res) => {
         password: bcrypt.hashSync(req.body.password, 8)
     });
 
-    fail = err => {
+    const fail = err => {
         console.log(err);
         res.status(500).send({message: err});
     };

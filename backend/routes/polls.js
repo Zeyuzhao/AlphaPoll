@@ -23,10 +23,11 @@ const User = require('../models/User.model');
 } 
 */
 
+const USER_ID = "5fcbe7ddcc3a51528579109d";
 
 
 // TODO: Get authentication middleware
-router.post('/create', (req, res) => {
+router.post('/create', async (req, res) => {
   
   const surveyParams = req.body;
   const categories = surveyParams.meta.categories;
@@ -40,17 +41,32 @@ router.post('/create', (req, res) => {
   console.log(data);
   const newPoll = new Poll({
     ...surveyParams,
-    owner,
+    owner: USER_ID,
     data
   });
 
   console.log(newPoll);
 
+
+  // Save new poll and update users
+  // TODO: Make transactions atomic on failure
   newPoll.save()
-  .then(user => {
+  .then(async (err) => {
+    let user = (await User.findById(USER_ID).exec());
+    
+    console.log(User);
+    if (user == null) {
+      res.send({"response": "failure", "msg": "user not found"});
+      // TODO: throw exception
+      return;
+    }
+
+    await user.updateOne({ $push: {polls: newPoll._id.toString() }})
+    user.save();
     res.json({ id: newPoll._id });
   })
-  .catch(err => console.log(err));
+  .catch(err => {console.log(err); res.send("error")});
+
 });
 
 // TODO: Get authentication middleware
