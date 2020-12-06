@@ -3,6 +3,9 @@ import React, { Component, useState } from 'react';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import "./dashboard.css";
+import Cookies from 'universal-cookie';
+
+const cookies = new Cookies();
 
 export default class Dashboard extends Component {
     constructor(props) {
@@ -157,10 +160,18 @@ export default class Dashboard extends Component {
             });
         }
 
-        const userID = "bob";
-        const getLoc = "/users/" + userID + "/polls/";
+        const token = cookies.get("token");
+        const getLoc = "http://localhost:5000/polls/all";
+        const obj = {token: token};
 
-        return axios.get(getLoc)
+        console.log(token);
+        return axios({
+            method: 'get',
+            url: "http://localhost:5000/polls/all",
+            data: {
+                token: cookies.get("token") || "",
+            }
+        })
         .then(res => {
             return res.data.map(pollID => getPoll(pollID));
         })

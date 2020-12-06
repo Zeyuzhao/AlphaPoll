@@ -9,28 +9,7 @@ export default class PollResponse extends Component {
         super(props);
 
         this.state = {
-            poll: { // hard coded in, should init to null
-                meta: {
-                  categories: [
-                    "yes",
-                    "no",
-                    "maybe",
-                  ],
-                  type: "binary",
-                  question: "Do you eat fast food"
-                },
-                data: [
-                  {category: "yes", value: 10, CI: 2.3},
-                  {category: "no", value: 20, CI: 1},
-                  {category: "maybe", value: 4, CI: 0.4},
-                ],
-                active: true,
-                _id: "5fcc420f887f5c19a1d59bd1",
-                title: "Test",
-                owner: "bob",
-                date: "2020-12-06T02:29:35.080Z",
-                __v: 0,
-              },
+            poll: null,
             id: null,
             chosen: false,
         };
