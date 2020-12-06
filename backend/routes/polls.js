@@ -40,14 +40,29 @@ router.post('/create', (req, res) => {
 
 });
 
-router.post('/submit/:id', (req, res) => {
+router.post('/submit/:id', async (req, res) => {
   const surveyID = req.params.id;
   const val = req.body.value;
-  console.log(surveyID);
+  
+  let items = [];
+  await Poll.findById(surveyID, function (err, poll) { items = poll.meta.categories });
+  console.log(items);
 
+  // Check if response is a valid option
+  const index = items.indexOf(val)
+  if (index == -1)
+  {
+    res.json({response: "failure"});
+    return;
+  }
+
+  const key = "data." + index.toString();
+
+  console.log(`Key: ${key}`);
+  // Update the right selection of poll
   Poll.findByIdAndUpdate(
     surveyID, 
-    { $inc: {"data.0": 1 }}, 
+    { $inc: {[key] : 1 }}, 
     (err, survey) => {
       console.log(survey);
       if (!err) {
@@ -59,7 +74,7 @@ router.post('/submit/:id', (req, res) => {
       }
     }
   );
-  
 });
+
 
 module.exports = router;
