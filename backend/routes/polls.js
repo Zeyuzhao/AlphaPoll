@@ -31,7 +31,7 @@ router.post('/create', async (req, res) => {
   
   const surveyParams = req.body;
   const categories = surveyParams.meta.categories;
-  const owner = 'bob';
+  const owner = USER_ID;
   const data = categories.map(category => ({
     category,
     value: 0,
@@ -69,7 +69,7 @@ router.post('/create', async (req, res) => {
   .catch(err => {console.log(err); res.send("error")});
 });
 
-// TODO: Get authentication middleware
+
 router.post('/submit/:id', async (req, res) => {
   const surveyID = req.params.id;
   const val = req.body.value;
@@ -119,6 +119,7 @@ router.post('/submit/:id', async (req, res) => {
 });
 
 // View survey - without any data.
+// TODO: Get authentication middleware
 router.get('/view/:id', async (req, res) => {
   const surveyID = req.params.id;
 
@@ -135,6 +136,7 @@ router.get('/view/:id', async (req, res) => {
 
 
 // Require survey to be deactivated
+// TODO: Get authentication middleware
 router.get('/results/:id', async (req, res) => {
   const surveyID = req.params.id;
 
@@ -155,6 +157,7 @@ router.get('/results/:id', async (req, res) => {
 
 // When deactivating, we apply the full set of differential privacy measures
 // We will obtain the CI intervals for each
+// TODO: Get authentication middleware
 router.get('/deactivate/:id', async (req, res) => {
   const surveyID = req.params.id;
   
