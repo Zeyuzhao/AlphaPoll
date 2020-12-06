@@ -65,7 +65,7 @@ export default class Create extends Component {
 
                     <Button onClick={this.handleAddChoice}>Add Choice</Button>
                     <p></p>
-                    <Button>Create</Button>
+                    <Button type="submit">Create</Button>
                 </Form>
             </div>
         );
@@ -91,9 +91,10 @@ export default class Create extends Component {
 
         axios({
             method: 'post',
-            url: "http://localhost:5000/create",
+            url: "http://localhost:5000/polls/create",
             data: {
-                token: cookies.get("token") || ""
+                token: cookies.get("token") || "",
+                choices: this.state.choices
             }
         })
         .then(id => {
