@@ -16,10 +16,14 @@ export default class Login extends Component {
         return this.state.email.length > 0 && this.state.password.length > 0;
     }
 
+    handleSubmit(e) {
+        e.preventDefault();
+    }
+
     render() {
         return (
             <div className="Login">
-                <Form onSubmit={this.handleSubmit} action="/users/login">
+                <Form onSubmit={this.handleSubmit} action="http://localhost:5000/users/login" method="POST">
                     <Form.Group size="lg" controlId="email">
                         <Form.Label>Email</Form.Label>
                         <Form.Control
