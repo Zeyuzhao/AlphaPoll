@@ -52,13 +52,14 @@ router.post('/submit/:id', async (req, res) => {
   const index = items.indexOf(val)
   if (index == -1)
   {
-    res.json({response: "failure"});
+    res.json({response: "failure", msg: "value is not within choices"});
     return;
   }
 
   const key = "data." + index.toString();
 
   console.log(`Key: ${key}`);
+
   // Update the right selection of poll
   Poll.findByIdAndUpdate(
     surveyID, 
@@ -68,12 +69,23 @@ router.post('/submit/:id', async (req, res) => {
       if (!err) {
         survey.save().then(user => {
           res.json({ response: "success"});
-        }).catch(err => {response: "failure"});
+        }).catch(err => ({response: "failure", msg: "failed to update"}));
       } else {
-        res.json({ response: "failure" });
+        res.json({ response: "failure", msg: "failed to connect" });
       }
     }
   );
+});
+
+router.get('/view/:id', (req, res) => {
+  const surveyID = req.params.id;
+  Poll.findById(surveyID, function (err, poll) { 
+    if (err) {
+      res.json({"response": "failure"});
+      return;
+    }
+    res.json(poll);
+  });
 });
 
 
