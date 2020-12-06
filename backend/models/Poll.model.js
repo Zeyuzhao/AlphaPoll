@@ -9,9 +9,14 @@ const PollSchema = new Schema({
   meta: {
     type: { type: String },
     question: String,
-    categories: [String]
+    categories: [String],
+    epsilon: { type: Number, default: 3 }
   },
-  data: [Number],
+  data: [{
+    category: String,
+    value: Number,
+    CI: { type: Number, default: 0 }
+  }],
   active: { type: Boolean, default: true },
 });
 

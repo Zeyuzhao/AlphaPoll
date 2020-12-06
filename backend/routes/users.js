@@ -7,7 +7,7 @@ const router = express.Router();
 
 const User = require('../models/User.model.js');
 
-check_duplicate = (email, callback, fail) => {
+const check_duplicate = (email, callback, fail) => {
     User.findOne({
         email: email
     }).exec((err, user) => {
@@ -24,7 +24,7 @@ check_duplicate = (email, callback, fail) => {
 };
 
 router.post('/verify', (req, res) => {
-    let token = req.headers["x-access-token"];
+    let token = req.body.token;
 
     if (!token) {
         return res.status(403).send({ message: "No token provided!" });
@@ -34,26 +34,36 @@ router.post('/verify', (req, res) => {
         if (err) {
             return res.status(401).send({ message: "Unauthorized!" });
         }
-        req.userId = decoded.id;
+        res.send({ message: decoded.id });
     });
 });
 
-register = (req, res) => {
+const token = id => jwt.sign({ id: id }, config.secret, {
+    expiresIn: 86400 // 24 hours
+});
+
+const register = (req, res) => {
     console.log("registering!");
     const user = new User({
         name: req.body.name,
         email: req.body.email,
-        date: Date.now,
+        date: Date.now(),
         password: bcrypt.hashSync(req.body.password, 8)
     });
 
-    fail = err => {
+    const fail = err => {
         console.log(err);
         res.status(500).send({message: err});
-    }
+    };
 
     check_duplicate(user.email, () => user.save((err, user) => {
-        err ? fail(err) : res.send({ message: "User was registered successfully!" });
+        err ? fail(err) : res.send({
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            date: user.date,
+            accessToken: token(user._id)
+        });
     }), fail);
 };
 
@@ -71,7 +81,7 @@ router.post('/login', (req, res) => {
 
             if (!user) {
                 console.log("user not found, registering");
-                register(req, res);
+                return register(req, res);
                 // return res.status(404).send({ message: "User Not found." });
             }
 
@@ -88,16 +98,12 @@ router.post('/login', (req, res) => {
                 });
             }
 
-            var token = jwt.sign({ id: user.id }, config.secret, {
-                expiresIn: 86400 // 24 hours
-            });
-
             res.status(200).send({
                 id: user._id,
                 name: user.name,
                 email: user.email,
                 date: user.date,
-                accessToken: token
+                accessToken: token(user.id)
             });
         });
 });

@@ -5,11 +5,34 @@ import "./Login.css";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import axios from 'axios';
+import Cookies from 'universal-cookie';
+
+const cookies = new Cookies();
 
 export default class Login extends Component {
     constructor(props) {
         super(props);
-        this.state = { email: "", password: ""}
+        this.state = { email: "", password: ""};
+
+        this.handleSubmit = this.handleSubmit.bind(this);
+        // this.verifyUser = this.verifyUser.bind(this);
+        this.validateForm = this.validateForm.bind(this);
+    }
+
+    verifyUser() {
+        axios({
+            method: 'post',
+            url: 'http://localhost:5000/user/verify',
+            data: {
+                token: cookies.get("token") || ""
+            }
+        })
+            .then(res => {
+                console.log("VERIFIED", res);
+            })
+            .catch(err => {
+                console.log("unverified", err);
+            })
     }
 
     validateForm() {
@@ -18,12 +41,40 @@ export default class Login extends Component {
 
     handleSubmit(e) {
         e.preventDefault();
+
+        console.log("submitting");
+
+        axios({
+            method: 'post',
+            url: 'http://localhost:5000/users/login',
+            data: {
+                name: this.state.name,
+                email: this.state.email,
+                password: this.state.password
+            }
+        })
+            .then(res => {
+                console.log(res);
+                cookies.set('token', res.data.accessToken, { path: '/' });
+            })
+            .catch(err => {
+                console.log(err);
+            });
     }
+
 
     render() {
         return (
             <div className="Login">
-                <Form onSubmit={this.handleSubmit} action="http://localhost:5000/users/login" method="POST">
+                <Form onSubmit={this.handleSubmit}>
+                    <Form.Group size="lg" controlId="email">
+                        <Form.Label>Name</Form.Label>
+                        <Form.Control
+                            autoFocus
+                            type="text"
+                            onChange={(e) => this.setState({ name: e.target.value })}
+                        />
+                    </Form.Group>
                     <Form.Group size="lg" controlId="email">
                         <Form.Label>Email</Form.Label>
                         <Form.Control
