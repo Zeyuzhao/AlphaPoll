@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const config = require("src/models/config.js");
+const config = require("../config/keys.js");
 const bcrypt = require("bcryptjs");
 
 const express = require('express');
@@ -38,18 +38,41 @@ router.post('/verify', (req, res) => {
     });
 });
 
+register = (req, res) => {
+    console.log("registering!");
+    const user = new User({
+        name: req.body.name,
+        email: req.body.email,
+        date: Date.now,
+        password: bcrypt.hashSync(req.body.password, 8)
+    });
+
+    fail = err => {
+        console.log(err);
+        res.status(500).send({message: err});
+    }
+
+    check_duplicate(user.email, () => user.save((err, user) => {
+        err ? fail(err) : res.send({ message: "User was registered successfully!" });
+    }), fail);
+};
+
 router.post('/login', (req, res) => {
+    console.log("logging in!");
     User.findOne({
         email: req.body.email
     })
         .exec((err, user) => {
             if (err) {
+                console.log(err);
                 res.status(500).send({ message: err });
                 return;
             }
 
             if (!user) {
-                return res.status(404).send({ message: "User Not found." });
+                console.log("user not found, registering");
+                register(req, res);
+                // return res.status(404).send({ message: "User Not found." });
             }
 
             var passwordIsValid = bcrypt.compareSync(
@@ -58,6 +81,7 @@ router.post('/login', (req, res) => {
             );
 
             if (!passwordIsValid) {
+                console.log("invalid pass");
                 return res.status(401).send({
                     accessToken: null,
                     message: "Invalid Password!"
@@ -78,19 +102,6 @@ router.post('/login', (req, res) => {
         });
 });
 
-router.post('/register', (req, res) => {
-    const user = new User({
-        name: req.body.name,
-        email: req.body.email,
-        date: Date.now,
-        password: bcrypt.hashSync(req.body.password, 8)
-    });
-
-    fail = err => res.status(500).send({message: err});
-
-    check_duplicate(user.email, () => user.save((err, user) => {
-        err ? fail(err) : res.send({ message: "User was registered successfully!" });
-    }), fail);
-});
+router.post('/register', register);
 
 module.exports = router;
