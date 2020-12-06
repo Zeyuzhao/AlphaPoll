@@ -26,53 +26,51 @@ const User = require('../models/User.model');
 
 const USER_ID = "5fcbe7ddcc3a51528579109d";
 
-router.use((req, res, next) => {
-    console.log("using", req.body.token);
-    let token = req.body.token;
+const auth_guard = (req, res, next) => {
+  // console.log("using", req.body.token);
+  let token = req.body.token;
 
-    if (!token) {
-        return res.status(403).send({ message: "No token provided!" });
-    }
+  if (!token) {
+      return res.status(403).send({ message: "No token provided!" });
+  }
 
-    jwt.verify(token, config.secret, (err, decoded) => {
-        if (err) {
-            return res.status(401).send({ message: "Unauthorized!" });
-        }
-        req.body.user = decoded.id;
-        next();
-    });
-});
+  jwt.verify(token, config.secret, (err, decoded) => {
+      if (err) {
+          return res.status(401).send({ message: "Unauthorized!" });
+      }
+      req.body.user = decoded.id;
+      next();
+  });
+}
 
 
 // TODO: Get authentication middleware
-router.post('/create', async (req, res) => {
-  console.log("creating", req.body.user);
+router.post('/create', auth_guard, async (req, res) => {
   const surveyParams = req.body;
   const categories = surveyParams.meta.categories;
-  const owner = USER_ID;
+
+  const owner = req.body.user;
   const data = categories.map(category => ({
     category,
     value: 0,
     CI: 0
   }));
 
-  console.log(data);
   const newPoll = new Poll({
     ...surveyParams,
     owner: req.body.user,
     data
   });
 
-  console.log(newPoll);
-
 
   // Save new poll and update users
   // TODO: Make transactions atomic on failure
   newPoll.save()
   .then(async (err) => {
-    let user = (await User.findById(USER_ID).exec());
-    
-    console.log(user);
+    // const allUsers = await User.find();
+    // console.log(allUsers);
+
+    let user = (await User.findById(owner).exec());
     if (user == null) {
       res.send({"response": "failure", "msg": "user not found"});
       // TODO: throw exception
@@ -82,6 +80,7 @@ router.post('/create', async (req, res) => {
     // Updates user's poll collection (adds id to polls)
     await user.updateOne({ $push: {polls: newPoll._id.toString() }})
     user.save();
+    // console.log("User Update: ", user);
     res.json({ id: newPoll._id });
   })
   .catch(err => {console.log(err); res.send("error")});
@@ -225,5 +224,10 @@ router.get('/deactivate/:id', async (req, res) => {
 });
 
 
+router.get('/all', auth_guard, async (req, res) => {
+  const user_id = req.body.user;
+  let user = (await User.findById(user_id).exec());
+  res.json({ polls: user.polls });
+});
 
 module.exports = router;
