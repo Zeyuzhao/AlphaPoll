@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const privatize = require('../utils/privacy');
 const jwt = require("jsonwebtoken");
+const config = require("../config/keys.js");
 
 
 
@@ -25,10 +26,27 @@ const User = require('../models/User.model');
 
 const USER_ID = "5fcbe7ddcc3a51528579109d";
 
+router.use((req, res, next) => {
+    console.log("using", req.body.token);
+    let token = req.body.token;
+
+    if (!token) {
+        return res.status(403).send({ message: "No token provided!" });
+    }
+
+    jwt.verify(token, config.secret, (err, decoded) => {
+        if (err) {
+            return res.status(401).send({ message: "Unauthorized!" });
+        }
+        req.body.user = decoded.id;
+        next();
+    });
+});
+
 
 // TODO: Get authentication middleware
 router.post('/create', async (req, res) => {
-  
+  console.log("creating", req.body.user);
   const surveyParams = req.body;
   const categories = surveyParams.meta.categories;
   const owner = USER_ID;
@@ -41,7 +59,7 @@ router.post('/create', async (req, res) => {
   console.log(data);
   const newPoll = new Poll({
     ...surveyParams,
-    owner: USER_ID,
+    owner: req.body.user,
     data
   });
 
@@ -206,21 +224,6 @@ router.get('/deactivate/:id', async (req, res) => {
   );
 });
 
-router.use((req, res, next) => {
-    let token = req.body.token;
-
-    if (!token) {
-        return res.status(403).send({ message: "No token provided!" });
-    }
-
-    jwt.verify(token, config.secret, (err, decoded) => {
-        if (err) {
-            return res.status(401).send({ message: "Unauthorized!" });
-        }
-        req.user = decoded.id;
-        next();
-    });
-});
 
 
 module.exports = router;
