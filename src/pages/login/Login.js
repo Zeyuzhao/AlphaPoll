@@ -10,6 +10,7 @@ export default class Login extends Component {
     constructor(props) {
         super(props);
         this.state = { email: "", password: ""}
+        this.handleSubmit = this.handleSubmit.bind(this);
     }
 
     validateForm() {
@@ -18,12 +19,22 @@ export default class Login extends Component {
 
     handleSubmit(e) {
         e.preventDefault();
+
+        console.log("submitting");
+        axios({
+            method: 'post',
+            url: 'http://localhost:5000/user/login',
+            data: {
+                email: this.state.email,
+                password: this.state.password
+            }
+        });
     }
 
     render() {
         return (
             <div className="Login">
-                <Form onSubmit={this.handleSubmit} action="http://localhost:5000/users/login" method="POST">
+                <Form onSubmit={this.handleSubmit}>
                     <Form.Group size="lg" controlId="email">
                         <Form.Label>Email</Form.Label>
                         <Form.Control
