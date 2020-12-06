@@ -23,21 +23,6 @@ const check_duplicate = (email, callback, fail) => {
     });
 };
 
-router.post('/verify', (req, res) => {
-    let token = req.body.token;
-
-    if (!token) {
-        return res.status(403).send({ message: "No token provided!" });
-    }
-
-    jwt.verify(token, config.secret, (err, decoded) => {
-        if (err) {
-            return res.status(401).send({ message: "Unauthorized!" });
-        }
-        res.send({ message: decoded.id });
-    });
-});
-
 const token = id => jwt.sign({ id: id }, config.secret, {
     expiresIn: 86400 // 24 hours
 });
