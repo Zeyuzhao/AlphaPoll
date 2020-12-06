@@ -12,9 +12,11 @@ export default class Create extends Component {
         super(props);
 
         this.state = {
+            title: "",
+            question: "",
             choices: [],
             pollURL: null,
-        }
+        };
 
         this.handleAddChoice = this.handleAddChoice.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -55,8 +57,16 @@ export default class Create extends Component {
                 <h1 style={{textAlign: 'center', marginTop: '5%'}}>Create a New Poll</h1>
                 <Form onSubmit={this.handleSubmit}>
                     <Form.Group size="lg">
+                        <Form.Label>Title</Form.Label>
+                        <Form.Control
+                            type="text"
+                            onChange={(e) => this.setState({ title: e.target.value })}/>
+                    </Form.Group>
+                    <Form.Group size="lg">
                         <Form.Label>Question</Form.Label>
-                        <Form.Control/>
+                        <Form.Control
+                            type="text"
+                            onChange={(e) => this.setState({ question: e.target.value })}/>
                     </Form.Group>
 
                     <div id="choices">
@@ -88,13 +98,15 @@ export default class Create extends Component {
 
     handleSubmit(e) {
         e.preventDefault();
+        console.log(this.state.choices);
 
         axios({
             method: 'post',
             url: "http://localhost:5000/polls/create",
             data: {
                 token: cookies.get("token") || "",
-                choices: this.state.choices
+
+                title: this.state.title,
             }
         })
         .then(id => {

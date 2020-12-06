@@ -54,31 +54,31 @@ export default class PollResponse extends Component {
 
     /* Uncomment when API finished */
 
-    // componentDidMount() {
-    //     this.getPoll().then(res => {
-    //         this.setState({
-    //             poll: res.poll,
-    //             id: res.id,
-    //         });
-    //     });
-    // }
+    componentDidMount() {
+        this.getPoll().then(res => {
+            this.setState({
+                poll: res.poll,
+                id: res.id,
+            });
+        });
+    }
 
-    // getPoll() {
-    //     const domain = "http://localhost:3000";
-    //     const path = "http://localhost:3000/polls/submit";
-    //     const url = window.location.href;
-    //     const id = url.substring(path.length);
-    //     const getLoc = url.substring(domain.length);
-    //     console.log(domain, path, url, id, getLoc);
+    getPoll() {
+        const domain = "http://localhost:3000";
+        const path = "http://localhost:3000/polls/submit";
+        const url = window.location.href;
+        const id = url.substring(path.length);
+        const getLoc = url.substring(domain.length);
+        console.log(domain, path, url, id, getLoc);
 
-    //     return axios.get("poo") //axios.get(getLoc)
-    //     .then(res => {
-    //         return {poll: res.data, id: id};
-    //     })
-    //     .catch(err => {
-    //         console.log(err);
-    //     });
-    // }
+        return axios.get("poo") //axios.get(getLoc)
+        .then(res => {
+            return {poll: res.data, id: id};
+        })
+        .catch(err => {
+            console.log(err);
+        });
+    }
 
     choose() {
         this.setState({
