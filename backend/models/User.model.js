@@ -17,8 +17,9 @@ const UserSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
+  polls: [String]
 });
 
-const User = mongoose.model('User', UserSchema);
+const User = mongoose.model('user_temp', UserSchema);
 
 module.exports = User;
