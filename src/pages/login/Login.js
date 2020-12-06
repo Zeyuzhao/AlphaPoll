@@ -5,17 +5,47 @@ import "./Login.css";
 import axios from 'axios';
 
 export default class Login extends Component {
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    
     constructor(props) {
         super(props);
     }
 
+    validateForm() {
+        return email.length > 0 && password.length > 0;
+    }
+
+    handleSubmit(event) {
+        event.preventDefault();
+    }
+
+
     render() {
         return (
-            <div className="login-frame">
-                <div className="login-form">
-                    <h1 className="login-header">Login to AlphaPoll</h1>
-                    <GoogleLogin />
-                </div>
+            <div className="Login">
+                <Form onSubmit={handleSubmit} action="/login">
+                    <Form.Group size="lg" controlId="email">
+                        <Form.Label>Email</Form.Label>
+                        <Form.Control
+                            autoFocus
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                        />
+                    </Form.Group>
+                    <Form.Group size="lg" controlId="password">
+                        <Form.Label>Password</Form.Label>
+                        <Form.Control
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                    </Form.Group>
+                    <Button block size="lg" type="submit" disabled={!validateForm()}>
+                        Login
+                    </Button>
+                </Form>
             </div>
         )
     }
