@@ -27,6 +27,9 @@ ReactDOM.render(
               <Route path="/create">
                   <Create />
               </Route>
+              <Route path="/results">
+                <Poll />
+              </Route>
               <Route path="/polls">
                   <Respond />
               </Route>

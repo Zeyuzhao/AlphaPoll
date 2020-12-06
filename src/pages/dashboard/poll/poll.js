@@ -9,28 +9,8 @@ export default class Poll extends Component {
         super(props);
 
         this.state = {
-            poll: {
-                meta: {
-                  categories: [
-                    "yes",
-                    "no"
-                  ],
-                  type: "binary",
-                  question: "Do you eat fast food"
-                },
-                data: [
-                  {category: "yes", value: 10, CI: 2.3},
-                  {category: "no", value: 20, CI: 1},
-                  {category: "maybe", value: 4, CI: 0.4},
-                ],
-                active: true,
-                _id: "5fcc420f887f5c19a1d59bd1",
-                title: "Test",
-                owner: "bob",
-                date: "2020-12-06T02:29:35.080Z",
-                __v: 0,
-              }
-              
+            poll: null,
+            available: false,
         }
     }
 
@@ -38,6 +18,7 @@ export default class Poll extends Component {
         if (this.state.poll === null) {
             return null;
         }
+        console.log(this.state.available);
         return (
             <div className="poll-frame">
                 <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -51,26 +32,36 @@ export default class Poll extends Component {
                         <button class="btn btn-success my-2 my-sm-0" type="submit">Create New Poll</button>
                     </div>
                 </nav>
-                <BarGraph poll={this.state.poll}/>
+                {this.state.available ? <BarGraph poll={this.state.poll}/> : <Unavailable />}
             </div>
         );
     }
 
-    /* Could do this GET request, can also pass in the poll as props. Whatever you want. */
     componentDidMount() {
         this.getPoll()
-        .then(poll => {
-            this.setState({
-                poll: poll,
-            });
+        .then(res => {
+            if (res.response === "failure") {
+                this.setState({
+                    poll: "bad poll",
+                    available: false,
+                });
+            } else {
+                this.setState({
+                    poll: res,
+                    available: true,
+                });
+            }
         })
     }
 
     getPoll() {
-        const pollID = "123abc";
-        const getLoc = "/polls/view/" + pollID; 
+        const path = "http://localhost:3000/results";
+        const url = document.location.href;
+        const pollID = url.substring(path.length);
+        const getLoc = "http://localhost:5000/polls/results" + pollID; 
         return axios.get(getLoc)
         .then(res => {
+            console.log(res.data);
             return res.data;
         })
     }
@@ -119,5 +110,17 @@ class BarGraph extends Component {
             dataPoints.push({y: data.value, label: data.category, CI: data.CI})
         }
         return dataPoints;
+    }
+}
+
+
+class Unavailable extends Component {
+    render() {
+        return (
+            <div style={{textAlign: 'center', marginTop: '10%'}}>
+                <h1>This poll is still active</h1>
+                <h2>To see the poll results, close the poll!</h2>
+            </div>
+        )
     }
 }

@@ -29,7 +29,7 @@ const USER_ID = "5fcbe7ddcc3a51528579109d";
 const auth_guard = (req, res, next) => {
   // console.log("using", req.body.token);
   let token = req.body.token;
-
+  console.log(token);
   if (!token) {
       return res.status(403).send({ message: "No token provided!" });
   }
@@ -175,7 +175,7 @@ router.get('/results/:id', async (req, res) => {
 // When deactivating, we apply the full set of differential privacy measures
 // We will obtain the CI intervals for each
 // TODO: Get authentication middleware
-router.get('/deactivate/:id', async (req, res) => {
+router.post('/deactivate/:id', async (req, res) => {
   const surveyID = req.params.id;
   
   let poll = (await Poll.findById(surveyID).exec());
@@ -198,7 +198,7 @@ router.get('/deactivate/:id', async (req, res) => {
     // privatizes value and generates 0.95 confidence bound
 
     const {val, CI} = privatize(entry.value, epsilon);
-    entry.value = val.toFixed(0);
+    entry.value = Math.max(0, val.toFixed(0));
     entry.CI = CI.toFixed(1);
     return entry;
   });
@@ -224,7 +224,7 @@ router.get('/deactivate/:id', async (req, res) => {
 });
 
 
-router.get('/all', auth_guard, async (req, res) => {
+router.post('/all', auth_guard, async (req, res) => {
   const user_id = req.body.user;
   let user = (await User.findById(user_id).exec());
   res.json({ polls: user.polls });

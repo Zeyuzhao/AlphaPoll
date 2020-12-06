@@ -12,67 +12,7 @@ export default class Dashboard extends Component {
         super(props);
 
         this.state = { // hard coded for testing, should init to null when API done
-            polls: [{
-                meta: {
-                  categories: [
-                    "yes",
-                    "no"
-                  ],
-                  type: "binary",
-                  question: "Do you eat fast food"
-                },
-                data: [
-                  {category: "yes", value: 10, CI: 2.3},
-                  {category: "no", value: 20, CI: 1},
-                  {category: "maybe", value: 4, CI: 0.4},
-                ],
-                active: true,
-                _id: "5fcc420f887f5c19a1d59bd1",
-                title: "Test",
-                owner: "bob",
-                date: "2020-12-06T02:29:35.080Z",
-                __v: 0,
-              }, {
-                meta: {
-                  categories: [
-                    "yes",
-                    "no"
-                  ],
-                  type: "binary",
-                  question: "Do you eat fast food"
-                },
-                data: [
-                  {category: "yes", value: 10, CI: 2.3},
-                  {category: "no", value: 20, CI: 1},
-                  {category: "maybe", value: 4, CI: 0.4},
-                ],
-                active: true,
-                _id: "5fcc420f887f5c19a1d59bd1",
-                title: "Test",
-                owner: "bob",
-                date: "2020-12-06T02:29:35.080Z",
-                __v: 0,
-              }, {
-                meta: {
-                  categories: [
-                    "yes",
-                    "no"
-                  ],
-                  type: "binary",
-                  question: "Do you eat fast food"
-                },
-                data: [
-                  {category: "yes", value: 10, CI: 2.3},
-                  {category: "no", value: 20, CI: 1},
-                  {category: "maybe", value: 4, CI: 0.4},
-                ],
-                active: true,
-                _id: "5fcc420f887f5c19a1d59bd1",
-                title: "Test",
-                owner: "bob",
-                date: "2020-12-06T02:29:35.080Z",
-                __v: 0,
-              }],
+            polls: [],
         };
 
         this.makeAllRows = this.makeAllRows.bind(this);
@@ -93,7 +33,7 @@ export default class Dashboard extends Component {
                                 <a class="navbar-brand" href="/">AlphaPoll</a>
                             </li>
                         </ul>
-                        <button class="btn btn-success my-2 my-sm-0" type="submit">Create New Poll</button>
+                        <button class="btn btn-success my-2 my-sm-0" type="submit" onClick={this.createPoll}>Create New Poll</button>
                     </div>
                 </nav>
                 <h1 style={{textAlign: 'center'}}>Your Polls</h1>
@@ -105,25 +45,31 @@ export default class Dashboard extends Component {
                             <th scope="col">Question</th>
                             <th scope="col">Status</th>
                             <th scope="col">View</th>
+                            <th scope="col">Close</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {this.makeAllRows}
+                        {this.makeAllRows()}
                     </tbody>
                 </table>
             </div>
         );
     }
 
+    createPoll() {
+        window.location.href = "http://localhost:3000/create";
+    }
+
     makeAllRows() {
-        function makeRow(number, date, question, active) {
+        const makeRow = (number, date, question, active, id) => {
             return (
                 <tr>
                     <th scope="row">{number}</th>
                     <td>{date}</td>
                     <td>{question}</td>
                     <td>{active ? "Active" : "Completed"}</td>
-                    <td><a href="/">View</a></td>
+                    <td><a href={"/results/" + id}>View</a></td>
+                    <td>{active ? <button className="btn btn-primary" onClick={this.closePoll(id)}>Close Poll</button> : null}</td>
                 </tr>
             );
         }
@@ -131,9 +77,25 @@ export default class Dashboard extends Component {
         var rows = [];
         for (var i = 0; i < this.state.polls.length; i++) {
             const poll = this.state.polls[i];
-            rows.push(makeRow(i + 1, poll.date, poll.meta.question, poll.active));
+            rows.push(makeRow(i + 1, poll.date, poll.meta.question, poll.active, poll._id));
         }
         return rows;
+    }
+
+    closePoll(id) {
+        const close = () => {
+            const postLoc = "http://localhost:5000/polls/deactivate/" + id;
+            console.log(postLoc);
+            axios.post(postLoc, {data: {token: cookies.get("token") || "",}})
+            .then(res => {
+                
+            })
+            .catch(err => {
+                console.log(err);
+            })
+        }
+
+        return close;
     }
 
     /* Uncomment this code when API done. */
@@ -149,7 +111,7 @@ export default class Dashboard extends Component {
 
     getPollIDs() {
         function getPoll(pollID) {
-            const getLoc = pollID;
+            const getLoc = "http://localhost:5000/polls/view/" + pollID;
     
             return axios.get(getLoc)
             .then(res => {
@@ -166,14 +128,21 @@ export default class Dashboard extends Component {
 
         console.log(token);
         return axios({
-            method: 'get',
+            method: 'post',
             url: "http://localhost:5000/polls/all",
             data: {
                 token: cookies.get("token") || "",
             }
         })
-        .then(res => {
-            return res.data.map(pollID => getPoll(pollID));
+        .then(async res => {
+            console.log(res.data);
+            var polls = []
+            for (var i = 0; i < res.data.polls.length; i++) {
+                const pollID = res.data.polls[i];
+                const poll = await getPoll(pollID)
+                polls.push(poll);
+            }
+            return polls;
         })
         .catch(err => {
             console.log(err);
