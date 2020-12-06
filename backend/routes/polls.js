@@ -53,19 +53,19 @@ router.post('/create', async (req, res) => {
   .then(async (err) => {
     let user = (await User.findById(USER_ID).exec());
     
-    console.log(User);
+    console.log(user);
     if (user == null) {
       res.send({"response": "failure", "msg": "user not found"});
       // TODO: throw exception
       return;
     }
-
+    
+    // Updates user's poll collection (adds id to polls)
     await user.updateOne({ $push: {polls: newPoll._id.toString() }})
     user.save();
     res.json({ id: newPoll._id });
   })
   .catch(err => {console.log(err); res.send("error")});
-
 });
 
 // TODO: Get authentication middleware

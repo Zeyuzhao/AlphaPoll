@@ -20,6 +20,6 @@ const UserSchema = new mongoose.Schema({
   polls: [String]
 });
 
-const User = mongoose.model('user_temp', UserSchema);
+const User = mongoose.model('users', UserSchema);
 
 module.exports = User;
