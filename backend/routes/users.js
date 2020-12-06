@@ -34,7 +34,7 @@ router.post('/verify', (req, res) => {
         if (err) {
             return res.status(401).send({ message: "Unauthorized!" });
         }
-        req.userId = decoded.id;
+        res.send({ message: decoded.id });
     });
 });
 

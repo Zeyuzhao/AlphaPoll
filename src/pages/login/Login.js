@@ -21,6 +21,7 @@ export default class Login extends Component {
         e.preventDefault();
 
         console.log("submitting");
+
         axios({
             method: 'post',
             url: 'http://localhost:5000/users/login',
@@ -29,7 +30,13 @@ export default class Login extends Component {
                 email: this.state.email,
                 password: this.state.password
             }
-        });
+        })
+            .then(res => {
+                console.log(res);
+            })
+            .catch(err => {
+                console.log(err);
+            });
     }
 
     render() {
