@@ -11,7 +11,11 @@ const PollSchema = new Schema({
     question: String,
     categories: [String]
   },
-  data: [Number],
+  data: [{
+    category: String,
+    value: Number,
+    CI: { type: Number, default: 0 }
+  }],
   active: { type: Boolean, default: true },
 });
 

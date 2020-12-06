@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
-var ObjectID = require('mongodb').ObjectID;   
+const privatize = require('../utils/privacy');
+
+var ObjectID = require('mongodb').ObjectID;
+
 
 // User model
 const Poll = require('../models/Poll.model');
@@ -19,15 +22,26 @@ const User = require('../models/User.model');
   }
 } 
 */
-router.post('/create', (req, res) => {
-  const surveyParams = req.body;
-  const length = surveyParams.meta.categories.length;
-  const owner = 'bob';
 
+
+
+// TODO: Get authentication middleware
+router.post('/create', (req, res) => {
+  
+  const surveyParams = req.body;
+  const categories = surveyParams.meta.categories;
+  const owner = 'bob';
+  const data = categories.map(category => ({
+    category,
+    value: 0,
+    CI: 0
+  }));
+
+  console.log(data);
   const newPoll = new Poll({
     ...surveyParams,
     owner,
-    data: Array.from(Array(length), () => 0)
+    data
   });
 
   console.log(newPoll);
@@ -37,28 +51,35 @@ router.post('/create', (req, res) => {
     res.json({ id: newPoll._id });
   })
   .catch(err => console.log(err));
-
 });
 
+// TODO: Get authentication middleware
 router.post('/submit/:id', async (req, res) => {
   const surveyID = req.params.id;
   const val = req.body.value;
   
-  let items = [];
-  await Poll.findById(surveyID, function (err, poll) { items = poll.meta.categories });
-  console.log(items);
+  let poll = (await Poll.findById(surveyID).exec());
+
+  // Poll cannot be found
+  if (poll == null){
+    res.json({response: "failure", msg: "Poll not found with ID"});
+  }
+
+  // Poll cannot be incremented if deactivated
+  if (!poll.active){
+    res.json({response: "failure", msg: "Poll is inactive"});
+  }
 
   // Check if response is a valid option
-  const index = items.indexOf(val)
-  if (index == -1)
+  const index = poll.data.findIndex((e) => e.category === val);
+  
+  if (index === -1)
   {
     res.json({response: "failure", msg: "value is not within choices"});
     return;
   }
 
-  const key = "data." + index.toString();
-
-  console.log(`Key: ${key}`);
+  const key = `data.${index}.value`;
 
   // Update the right selection of poll
   Poll.findByIdAndUpdate(
@@ -66,27 +87,65 @@ router.post('/submit/:id', async (req, res) => {
     { $inc: {[key] : 1 }}, 
     (err, survey) => {
       console.log(survey);
-      if (!err) {
+      if (!err && survey) {
+
+        // Save the results
         survey.save().then(user => {
           res.json({ response: "success"});
-        }).catch(err => ({response: "failure", msg: "failed to update"}));
+        }).catch(err => ({response: "failure", msg: "survey update failed"}));
+
       } else {
-        res.json({ response: "failure", msg: "failed to connect" });
+        // invalid surveyID
+        res.json({ response: "failure", msg: "Invalid survey ID" });
       }
     }
   );
 });
 
-router.get('/view/:id', (req, res) => {
+// Not allowed to view until deactivated
+router.get('/view/:id', async (req, res) => {
   const surveyID = req.params.id;
-  Poll.findById(surveyID, function (err, poll) { 
-    if (err) {
-      res.json({"response": "failure"});
-      return;
-    }
-    res.json(poll);
-  });
+
+  let poll = (await Poll.findById(surveyID).exec());
+
+  if (!poll) {
+    res.json({"response": "failure", msg: "poll cannot be found with id"});
+    return;
+  }
+
+  if (poll.active) {
+    res.json({"response": "failure", msg: "active poll: statistics are not available"});
+    return;
+  }
+  res.json(poll);
 });
+
+
+// When deactivating, we apply the full set of differential privacy measures
+// We will obtain the CI intervals for each
+router.get('/deactivate/:id', async (req, res) => {
+  const surveyID = req.params.id;
+
+  Poll.findByIdAndUpdate(
+    surveyID, 
+    { $set: {active: false }}, 
+    (err, survey) => {
+      console.log(survey);
+      if (!err && survey) {
+
+        // Save the results
+        survey.save().then(user => {
+          res.json({ response: "success"});
+        }).catch(err => ({response: "failure", msg: "survey update failed"}));
+      } else {
+        // invalid surveyID
+        res.json({ response: "failure", msg: "invalid survey ID" });
+      }
+    }
+  );
+});
+
+
 
 
 module.exports = router;
