@@ -28,7 +28,7 @@ const USER_ID = "5fcbe7ddcc3a51528579109d";
 
 // TODO: Get authentication middleware
 router.post('/create', async (req, res) => {
-  
+  console.log("creating", req.user);
   const surveyParams = req.body;
   const categories = surveyParams.meta.categories;
   const owner = 'bob';
@@ -41,7 +41,7 @@ router.post('/create', async (req, res) => {
   console.log(data);
   const newPoll = new Poll({
     ...surveyParams,
-    owner: USER_ID,
+    owner: req.user,
     data
   });
 

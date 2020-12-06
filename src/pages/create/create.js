@@ -4,7 +4,9 @@ import ReactDOM from 'react-dom';
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import axios from 'axios';
+import Cookies from 'universal-cookie';
 
+const cookies = new Cookies();
 export default class Create extends Component {
     constructor(props) {
         super(props);
@@ -87,8 +89,13 @@ export default class Create extends Component {
     handleSubmit(e) {
         e.preventDefault();
 
-        const postLoc = "poo";
-        axios.post(postLoc)
+        axios({
+            method: 'post',
+            url: "http://localhost:5000/create",
+            data: {
+                token: cookies.get("token") || ""
+            }
+        })
         .then(id => {
             this.setState({
                 pollURL: "localhost:3000/polls/" + id,
