@@ -13,9 +13,9 @@ import {
 ReactDOM.render(
   <React.StrictMode>
       <BrowserRouter>
-          <Link to='/dashboard'> Dashboard </Link>
-          <Link to='/login'> Login </Link>
-          <Link to='/create'> Create </Link>
+          {/*<Link to='/dashboard'> Dashboard </Link>*/}
+          {/*<Link to='/login'> Login </Link>*/}
+          {/*<Link to='/create'> Create </Link>*/}
 
           <Switch>
               <Route path="/login">
