@@ -9,7 +9,8 @@ const PollSchema = new Schema({
   meta: {
     type: { type: String },
     question: String,
-    categories: [String]
+    categories: [String],
+    epsilon: { type: Number, default: 3 }
   },
   data: [{
     category: String,

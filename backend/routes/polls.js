@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const privatize = require('../utils/privacy');
 
-var ObjectID = require('mongodb').ObjectID;
 
 
 // User model
@@ -102,8 +101,24 @@ router.post('/submit/:id', async (req, res) => {
   );
 });
 
-// Not allowed to view until deactivated
+// View survey - without any data.
 router.get('/view/:id', async (req, res) => {
+  const surveyID = req.params.id;
+
+  let poll = (await Poll.findById(surveyID).exec());
+
+  if (!poll) {
+    res.json({"response": "failure", msg: "poll cannot be found with id"});
+    return;
+  }
+  // Dropping the data attribute
+  poll.data = undefined;
+  res.json(poll);
+});
+
+
+// Require survey to be deactivated
+router.get('/results/:id', async (req, res) => {
   const surveyID = req.params.id;
 
   let poll = (await Poll.findById(surveyID).exec());
@@ -125,14 +140,40 @@ router.get('/view/:id', async (req, res) => {
 // We will obtain the CI intervals for each
 router.get('/deactivate/:id', async (req, res) => {
   const surveyID = req.params.id;
+  
+  let poll = (await Poll.findById(surveyID).exec());
+
+  // Poll cannot be found
+  if (poll == null){
+    res.json({response: "failure", msg: "Poll not found with ID"});
+  }
+
+  // // Poll already deactivated
+  // if (!poll.active){
+  //   res.json({response: "failure", msg: "Poll already deactivated"});
+  // }
+
+  let data = poll.data;
+  let epsilon = poll.meta.epsilon;
+
+  const priv_data = data.map((entry) => {
+
+    // privatizes value and generates 0.95 confidence bound
+
+    const {val, CI} = privatize(entry.value, epsilon);
+    entry.value = val.toFixed(0);
+    entry.CI = CI.toFixed(1);
+    return entry;
+  });
+
+  console.log("Privatized Data: ", priv_data)
 
   Poll.findByIdAndUpdate(
     surveyID, 
-    { $set: {active: false }}, 
+    { $set: {active: false, data: priv_data}}, 
     (err, survey) => {
       console.log(survey);
       if (!err && survey) {
-
         // Save the results
         survey.save().then(user => {
           res.json({ response: "success"});
