@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const privatize = require('../utils/privacy');
+const jwt = require("jsonwebtoken");
 
 
 
@@ -202,7 +203,21 @@ router.get('/deactivate/:id', async (req, res) => {
   );
 });
 
+router.use((req, res, next) => {
+    let token = req.body.token;
 
+    if (!token) {
+        return res.status(403).send({ message: "No token provided!" });
+    }
+
+    jwt.verify(token, config.secret, (err, decoded) => {
+        if (err) {
+            return res.status(401).send({ message: "Unauthorized!" });
+        }
+        req.user = decoded.id;
+        next();
+    });
+});
 
 
 module.exports = router;
