@@ -20,53 +20,38 @@ verify_token = (req, res, next) => {
     });
 };
 
-check_duplicate = (username, email, callback, fail) => {
-    // Username
+check_duplicate = (email, callback, fail) => {
     User.findOne({
-        username: username
+        email: email
     }).exec((err, user) => {
         if (err) {
             fail(err);
         }
 
         if (user) {
-            fail("Failed! Username is already in use!");
+            fail("Failed! Email is already in use!");
         }
 
-        // Email
-        User.findOne({
-            email: email
-        }).exec((err, user) => {
-            if (err) {
-                fail(err);
-            }
-
-            if (user) {
-                fail("Failed! Email is already in use!");
-            }
-
-            callback();
-        });
+        callback();
     });
 };
 
 signup = (req, res) => {
     const user = new User({
-        username: req.body.username,
         email: req.body.email,
         password: bcrypt.hashSync(req.body.password, 8)
     });
 
     fail = err => res.status(500).send({message: err});
 
-    check_duplicate(user.username, user.email, () => user.save((err, user) => {
+    check_duplicate(user.email, () => user.save((err, user) => {
         err ? fail(err) : res.send({ message: "User was registered successfully!" });
     }), fail);
 };
 
 signin = (req, res) => {
     User.findOne({
-        username: req.body.username
+        email: req.body.email
     })
         .exec((err, user) => {
             if (err) {
@@ -96,7 +81,6 @@ signin = (req, res) => {
 
             res.status(200).send({
                 id: user._id,
-                username: user.username,
                 email: user.email,
                 accessToken: token
             });

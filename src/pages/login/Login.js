@@ -7,7 +7,7 @@ import axios from 'axios';
 export default class Login extends Component {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    
+
     constructor(props) {
         super(props);
     }
