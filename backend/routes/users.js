@@ -38,6 +38,10 @@ router.post('/verify', (req, res) => {
     });
 });
 
+token = id => jwt.sign({ id: id }, config.secret, {
+    expiresIn: 86400 // 24 hours
+});
+
 register = (req, res) => {
     console.log("registering!");
     const user = new User({
@@ -50,10 +54,16 @@ register = (req, res) => {
     fail = err => {
         console.log(err);
         res.status(500).send({message: err});
-    }
+    };
 
     check_duplicate(user.email, () => user.save((err, user) => {
-        err ? fail(err) : res.send({ message: "User was registered successfully!" });
+        err ? fail(err) : res.send({
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            date: user.date,
+            accessToken: token(user._id)
+        });
     }), fail);
 };
 
@@ -88,16 +98,12 @@ router.post('/login', (req, res) => {
                 });
             }
 
-            var token = jwt.sign({ id: user.id }, config.secret, {
-                expiresIn: 86400 // 24 hours
-            });
-
             res.status(200).send({
                 id: user._id,
                 name: user.name,
                 email: user.email,
                 date: user.date,
-                accessToken: token
+                accessToken: token(user.id)
             });
         });
 });
