@@ -24,7 +24,7 @@ check_duplicate = (email, callback, fail) => {
 };
 
 router.post('/verify', (req, res) => {
-    let token = req.headers["x-access-token"];
+    let token = req.body.token;
 
     if (!token) {
         return res.status(403).send({ message: "No token provided!" });
