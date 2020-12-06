@@ -124,9 +124,9 @@ export default class Create extends Component {
                 }
             }
         })
-        .then(id => {
+        .then(res => {
             this.setState({
-                pollURL: "localhost:3000/polls/" + id,
+                pollURL: "localhost:3000/polls/" + res.data.id,
             });
         })
         .catch(err => {
