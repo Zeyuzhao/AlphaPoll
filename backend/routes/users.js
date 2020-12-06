@@ -88,6 +88,7 @@ router.post('/login', (req, res) => {
                 name: user.name,
                 email: user.email,
                 date: user.date,
+                polls: user.polls,
                 accessToken: token(user.id)
             });
         });

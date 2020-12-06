@@ -43,8 +43,6 @@ const auth_guard = (req, res, next) => {
   });
 }
 
-
-// TODO: Get authentication middleware
 router.post('/create', auth_guard, async (req, res) => {
   const surveyParams = req.body;
   const categories = surveyParams.meta.categories;
@@ -136,7 +134,7 @@ router.post('/submit/:id', async (req, res) => {
 });
 
 // View survey - without any data.
-// TODO: Get authentication middleware
+// TODO: Get authentication middleware and implement guard
 router.get('/view/:id', async (req, res) => {
   const surveyID = req.params.id;
 
@@ -175,7 +173,7 @@ router.get('/results/:id', async (req, res) => {
 // When deactivating, we apply the full set of differential privacy measures
 // We will obtain the CI intervals for each
 // TODO: Get authentication middleware
-router.get('/deactivate/:id', async (req, res) => {
+router.post('/deactivate/:id', async (req, res) => {
   const surveyID = req.params.id;
   
   let poll = (await Poll.findById(surveyID).exec());
@@ -185,10 +183,10 @@ router.get('/deactivate/:id', async (req, res) => {
     res.json({response: "failure", msg: "Poll not found with ID"});
   }
 
-  // // Poll already deactivated
-  // if (!poll.active){
-  //   res.json({response: "failure", msg: "Poll already deactivated"});
-  // }
+  // Poll already deactivated
+  if (!poll.active){
+    res.json({response: "failure", msg: "Poll already deactivated"});
+  }
 
   let data = poll.data;
   let epsilon = poll.meta.epsilon;
@@ -198,7 +196,9 @@ router.get('/deactivate/:id', async (req, res) => {
     // privatizes value and generates 0.95 confidence bound
 
     const {val, CI} = privatize(entry.value, epsilon);
-    entry.value = val.toFixed(0);
+
+    // Floor value: 0
+    entry.value = Math.max(0, val.toFixed(0));
     entry.CI = CI.toFixed(1);
     return entry;
   });
