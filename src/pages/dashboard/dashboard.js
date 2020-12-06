@@ -1,5 +1,3 @@
-import React, { Component } from 'react';
-
 import axios from 'axios';
 import React, { Component, useState } from 'react';
 
@@ -73,6 +71,9 @@ export default class Dashboard extends Component {
                 __v: 0,
               }],
         };
+
+        this.makeAllRows = this.makeAllRows.bind(this);
+        this.componentDidMount = this.componentDidMount.bind(this);
     }
 
     render() {
@@ -104,7 +105,7 @@ export default class Dashboard extends Component {
                         </tr>
                     </thead>
                     <tbody>
-                        {this.makeAllRows()}
+                        {this.makeAllRows}
                     </tbody>
                 </table>
             </div>
@@ -134,37 +135,37 @@ export default class Dashboard extends Component {
 
     /* Uncomment this code when API done. */
 
-    // componentDidMount() {
-    //     this.getPollIDs()
-    //     .then(polls => {
-    //         this.setState({
-    //             polls: polls,
-    //         });
-    //     })
-    // }
+    componentDidMount() {
+        this.getPollIDs()
+        .then(polls => {
+            this.setState({
+                polls: polls,
+            });
+        })
+    }
 
-    // getPollIDs() {
-    //     function getPoll(pollID) {
-    //         const getLoc = pollID;
+    getPollIDs() {
+        function getPoll(pollID) {
+            const getLoc = pollID;
     
-    //         return axios.get(getLoc)
-    //         .then(res => {
-    //             return res.data;
-    //         })
-    //         .catch(err => {
-    //             console.log(err);
-    //         });
-    //     }
+            return axios.get(getLoc)
+            .then(res => {
+                return res.data;
+            })
+            .catch(err => {
+                console.log(err);
+            });
+        }
 
-    //     const userID = "bob";
-    //     const getLoc = "/users/" + userID + "/polls/";
+        const userID = "bob";
+        const getLoc = "/users/" + userID + "/polls/";
 
-    //     return axios.get(getLoc)
-    //     .then(res => {
-    //         return res.data.map(pollID => getPoll(pollID));
-    //     })
-    //     .catch(err => {
-    //         console.log(err);
-    //     })
-    // }
+        return axios.get(getLoc)
+        .then(res => {
+            return res.data.map(pollID => getPoll(pollID));
+        })
+        .catch(err => {
+            console.log(err);
+        })
+    }
 }
