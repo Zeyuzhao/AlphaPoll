@@ -1,5 +1,3 @@
-## What track are you submitting to?
-We are submitting to the Inequalities Track.
 ## Inspiration and Theory
 	
 A recent innovation in the field of Computer Science and Mathematics is Differential Privacy. Differential Privacy is a set of theorems and mechanisms that enables a rigorous notion of privacy. This technique, in sort, adds random noise to obscure the data. We want to bring this technology to polls and surveys so that each user’s privacy can be preserved. 
