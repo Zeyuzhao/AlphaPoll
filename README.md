@@ -1,7 +1,7 @@
 ## Inspiration and Theory
 	
 A recent innovation in the field of Computer Science and Mathematics is Differential Privacy. Differential Privacy is a set of theorems and mechanisms that enables a rigorous notion of privacy. This technique, in sort, adds random noise to obscure the data. We want to bring this technology to polls and surveys so that each user’s privacy can be preserved. 
-###Motivating Example
+### Motivating Example
 Suppose our class keeps track of the number of people that have a failing grade (any grade less than 50). That alone seems innocuous - it is just the number of people and you don’t know who. Then, one day, Bob drops this class and coincidently the failing grade count drops, too. You probably can infer that Bob had a failing grade. 
 
 If we randomize the count every time (by adding some noise), even if Bob left the class, we won’t know a difference (it would be quite random). Thus, we don’t know what Bob’s grade is.
