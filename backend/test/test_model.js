@@ -1,0 +1,1 @@
+// Setup tests for Poll Model
