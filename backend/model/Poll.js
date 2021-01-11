@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-
+const mongoose = require('mongoose');
+const {nanoid} = require('nanoid');
 const questionSchema = new mongoose.Schema({
   prompt: {
     type: String,
@@ -30,11 +30,17 @@ const resultSchema = new mongoose.Schema({
     required: true,
   },
   frequency: [{
-    type: Number,
-    validate: {
-      validator: Number.isInteger,
-      message: '{VALUE} is not an integer value'
-    }
+    option: {
+      type: String,
+      required: true,
+    },
+    count: {
+      type: Number,
+      validate: {
+        validator: Number.isInteger,
+        message: '{VALUE} is not an integer value'
+      }
+    },
   }],
 });
 
@@ -54,6 +60,10 @@ const pollSchema = new mongoose.Schema({
     type: mongoose.Types.ObjectId, // Autocast?
     required: true,
   },    // Each response contains responses to multiple questions
+  shortId: { // will be used by the url
+    type: String,
+    default: () => nanoid(8),
+  },
   isPrivate: {
     type: Boolean,
     default: true,

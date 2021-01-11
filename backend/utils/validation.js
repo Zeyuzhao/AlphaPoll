@@ -29,11 +29,26 @@ const pollValidation = (data) => {
   const schema = Joi.object({
     name: Joi.string().min(1).required(),
     questions: questionsSchema,
-    owner: Joi.string(), // TODO: validate objectID
   });
   return schema.validate(data);
 };
 
-module.exports.registerValidation = registerValidation;
-module.exports.loginValidation = loginValidation;
-module.exports.pollValidation = pollValidation;
+const responseValidation = (data, poll) => {
+  const questions = poll.questions;
+
+  // TODO: change to custom validation?
+  const schema = Joi.object({
+    owner: Joi.string(), // optional
+    answers: Joi.array().ordered(...questions.map( // Every answer must be an option of its corresponding question
+      x => Joi.any().valid(...x.responses).required(),
+    )).required(),
+  });
+  return schema.validate(data);
+}
+
+module.exports = {
+  registerValidation, 
+  loginValidation, 
+  pollValidation, 
+  responseValidation
+};
